@@ -2,6 +2,8 @@
   (require rackunit)       
   (require rackunit/text-ui)
 
+  (require quickcheck)
+
   (require "scales.rkt")
   (require "notes.rkt")
 
@@ -35,19 +37,17 @@
     (test-suite "intervals"
                 (test-suite "inversion"
                             (test-case "perfect intervals remain perfect"
-                                       (check-equal? P4 (inversion-of P5))
-                                       (check-equal? P5 (inversion-of P4)))
+                                       (quickcheck
+                                        (property ((name (choose-one-of '(unison fourth fifth octave))))
+                                                  (equal? Perfect (quality-of (inversion-of (interval Perfect name)))))))
                             (test-case "minor intervals become major"
-                                       (check-equal? Major (quality-of (inversion-of m2)))
-                                       (check-equal? Major (quality-of (inversion-of m3)))
-                                       (check-equal? Major (quality-of (inversion-of m6)))
-                                       (check-equal? Major (quality-of (inversion-of m7))))
-                            (test-case "major intervals become major"
-                                       (check-equal? Minor (quality-of (inversion-of M2)))
-                                       (check-equal? Minor (quality-of (inversion-of M3)))
-                                       (check-equal? Minor (quality-of (inversion-of M6)))
-                                       (check-equal? Minor (quality-of (inversion-of M7))))
-                            (test-case "duals" ))
+                                       (quickcheck
+                                        (property ((name (choose-one-of '(second third sixth seventh))))
+                                                  (equal? Major (quality-of (inversion-of (interval Minor name)))))))
+                            (test-case "major intervals become minor"
+                                       (quickcheck
+                                        (property ((name (choose-one-of '(second third sixth seventh))))
+                                                  (equal? Minor (quality-of (inversion-of (interval Major name))))))))
                 
                 (test-suite "diminution"
                             (test-case "bigger intervals get smaller"
@@ -56,6 +56,7 @@
                                        (check-exn exn:fail?
                                                   (lambda ()
                                                     (diminished P1)))))
+                
                 (test-suite "equivalence"
                             (test-case "tone"
                                        (check-true (same-pitch-class? (at-interval-from C T) D)))
