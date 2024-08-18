@@ -64,11 +64,13 @@
                                      diatonic-octave-interval-sizes))
  
   (define (interval-of-a quality name)
-    (let ([candidate-intervals (apply (compose (λ intervals (filter (λ (an-interval) (equal? quality (interval-quality an-interval)))
-                                                                    (car intervals)))
-                                               (λ intervals (filter (λ (an-interval) (equal? name (interval-name an-interval)))
-                                                                    intervals)))
-                                      first-order-intervals)])
+    (let ([candidate-intervals (apply
+                                (compose
+                                 (λ intervals (filter (λ (an-interval) (equal? quality (interval-quality an-interval)))
+                                                      (car intervals)))
+                                 (λ intervals (filter (λ (an-interval) (equal? name (interval-name an-interval)))
+                                                      intervals)))
+                                first-order-intervals)])
       (cond [(not (eq? (length candidate-intervals) 1)) (error "I don't know about a "
                                                                (symbol->string quality)
                                                                (symbol->string name))]
@@ -91,8 +93,6 @@
   (define P8 (interval-of-a Perfect octave))
 
   (define all-intervals (list P1 m2 M2 m3 M3 P4 d5 P5 m6 M6 m7 M7 P8))
-
-
 
   (define (inversion-of an-interval)
     (let ([defecit-to-octave (- 12 (interval-semitone-count an-interval))])
@@ -126,7 +126,8 @@
 
   (define stack list)
   (define (span-of possibly-stacked-intervals)
-    (cond [(list? possibly-stacked-intervals) (fold + 0
-                                                    (map interval-semitone-count
-                                                         possibly-stacked-intervals))]
-          [else (interval-semitone-count possibly-stacked-intervals)])))
+    (cond [(interval? possibly-stacked-intervals) (interval-semitone-count possibly-stacked-intervals)]
+          [else
+           (fold + 0
+                 (map interval-semitone-count
+                      possibly-stacked-intervals))])))
