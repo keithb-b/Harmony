@@ -39,26 +39,26 @@
                 (test-suite "inversion"
                             (test-case "perfect intervals remain perfect"
                                        (check-property
-                                        (property ((quality (generator-unit Perfect))
-                                                   (name (choose-one-of '(unison fourth fifth octave))))
+                                        (property ([quality (generator-unit Perfect)]
+                                                   [name (choose-one-of '(unison fourth fifth octave))])
                                                   (equal? quality (interval-quality (inversion-of (interval-of-a quality name)))))))
                             (test-case "minor intervals become major"
                                        (check-property
-                                        (property ((name (choose-one-of '(second third sixth seventh))))
-                                                  (equal? Major (interval-quality (inversion-of (interval-of-a Minor name)))))))
-                            (test-case "major intervals become minor"
-                                       (check-property
-                                        (property ((name (choose-one-of '(second third sixth seventh))))
-                                                  (equal? Minor (interval-quality (inversion-of (interval-of-a Major name)))))))
-                            (test-suite "stacked inversion spans an octave"
-                                        (test-case "imperfect intervals"
-                                                   (check-property
-                                                    (property ((quality (choose-one-of '(Minor Major)))
-                                                               (name (choose-one-of '(second third sixth seventh))))
-                                                              (let* ([given (interval-of-a quality name)]
-                                                                     [inversion (inversion-of given)])
-                                                                (equal? (span-of P8)
-                                                                        (span-of (stack given inversion)))))))))
+                                        (property ([name (choose-one-of '(second third sixth seventh))])
+                                                  (equal? Major (interval-quality (inversion-of (interval-of-a Minor name))))))
+                                       (test-case "major intervals become minor"
+                                                  (check-property
+                                                   (property ([name (choose-one-of '(second third sixth seventh))])
+                                                             (equal? Minor (interval-quality (inversion-of (interval-of-a Major name)))))))
+                                       (test-suite "stacked inversion spans an octave"
+                                                   (test-case "imperfect intervals"
+                                                              (check-property
+                                                               (property ([quality (choose-one-of '(Minor Major))]
+                                                                          [name (choose-one-of '(second third sixth seventh))])
+                                                                         (let* ([given (interval-of-a quality name)]
+                                                                                [inversion (inversion-of given)])
+                                                                           (equal? (span-of P8)
+                                                                                   (span-of (stack given inversion))))))))))
                 
                 (test-suite "diminution"
                             (test-case "bigger intervals get smaller"
