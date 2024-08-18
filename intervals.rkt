@@ -63,17 +63,10 @@
                                      diatonic-octave-interval-name-sequence
                                      diatonic-octave-interval-sizes))
  
-  (define (quality-of interval)
-    (interval-quality interval))
-  (define (name-of interval)
-    (interval-name interval))
-  (define (semitone-count-of interval)
-    (interval-semitone-count interval))
- 
   (define (interval-of-a quality name)
-    (let ([candidate-intervals (apply (compose (λ intervals (filter (λ (an-interval) (equal? quality (quality-of an-interval)))
+    (let ([candidate-intervals (apply (compose (λ intervals (filter (λ (an-interval) (equal? quality (interval-quality an-interval)))
                                                                     (car intervals)))
-                                               (λ intervals (filter (λ (an-interval) (equal? name (name-of an-interval)))
+                                               (λ intervals (filter (λ (an-interval) (equal? name (interval-name an-interval)))
                                                                     intervals)))
                                       first-order-intervals)])
       (cond [(not (eq? (length candidate-intervals) 1)) (error "I don't know about a "
@@ -102,8 +95,8 @@
 
 
   (define (inversion-of an-interval)
-    (let ([defecit-to-octave (- 12 (semitone-count-of an-interval))])
-      (car (filter (λ (candidate-interval) (equal? defecit-to-octave (semitone-count-of candidate-interval)))
+    (let ([defecit-to-octave (- 12 (interval-semitone-count an-interval))])
+      (car (filter (λ (candidate-interval) (equal? defecit-to-octave (interval-semitone-count candidate-interval)))
                    all-intervals))))           
 
   (define %chromatic-interval-sequence
@@ -134,6 +127,6 @@
   (define stack list)
   (define (span-of possibly-stacked-intervals)
     (cond [(list? possibly-stacked-intervals) (fold + 0
-                                                    (map semitone-count-of
+                                                    (map interval-semitone-count
                                                          possibly-stacked-intervals))]
-          [else (semitone-count-of possibly-stacked-intervals)])))
+          [else (interval-semitone-count possibly-stacked-intervals)])))
