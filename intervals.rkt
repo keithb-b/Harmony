@@ -2,11 +2,13 @@
 
   (provide Diminished Minor Perfect Major Augmented)
   (provide unison second third fourth fifth sixth seventh octave)
-  (provide interval name-of semitone-count-of quality-of inversion-of diminished)
+  (provide interval interval-semitone-count interval-quality)
+  (provide interval-of-a inversion-of span-of stack diminished)
   (provide P1 m2 M2 m3 M3 P4 d5 P5 m6 M6 m7 M7 P8)
   (provide %chromatic-interval-sequence)
   
   (require (only-in srfi/1
+                    fold
                     concatenate
                     zip
                     iota))
@@ -53,18 +55,22 @@
   
   (define diatonic-octave-interval-sizes (iota 13))
 
-  (define first-order-intervals (zip diatonic-octave-quality-sequence
+  (struct interval (quality name semitone-count)
+    #:transparent)
+  
+  (define first-order-intervals (map interval
+                                     diatonic-octave-quality-sequence
                                      diatonic-octave-interval-name-sequence
                                      diatonic-octave-interval-sizes))
  
   (define (quality-of interval)
-    (car interval))
+    (interval-quality interval))
   (define (name-of interval)
-    (cadr interval))
+    (interval-name interval))
   (define (semitone-count-of interval)
-    (last interval))
+    (interval-semitone-count interval))
  
-  (define (interval quality name)
+  (define (interval-of-a quality name)
     (let ([candidate-intervals (apply (compose (λ intervals (filter (λ (an-interval) (equal? quality (quality-of an-interval)))
                                                                     (car intervals)))
                                                (λ intervals (filter (λ (an-interval) (equal? name (name-of an-interval)))
@@ -77,19 +83,19 @@
     
  
   ; first-order interval names
-  (define P1 (interval Perfect unison))
-  (define m2 (interval Minor second))
-  (define M2 (interval Major second))
-  (define m3 (interval Minor third))
-  (define M3 (interval Major third))
-  (define P4 (interval Perfect fourth))
-  (define d5 (interval Diminished fifth))
-  (define P5 (interval Perfect fifth))
-  (define m6 (interval Minor sixth))
-  (define M6 (interval Major sixth))
-  (define m7 (interval Minor seventh))
-  (define M7 (interval Major seventh))
-  (define P8 (interval Perfect octave))
+  (define P1 (interval-of-a Perfect unison))
+  (define m2 (interval-of-a Minor second))
+  (define M2 (interval-of-a Major second))
+  (define m3 (interval-of-a Minor third))
+  (define M3 (interval-of-a Major third))
+  (define P4 (interval-of-a Perfect fourth))
+  (define d5 (interval-of-a Diminished fifth))
+  (define P5 (interval-of-a Perfect fifth))
+  (define m6 (interval-of-a Minor sixth))
+  (define M6 (interval-of-a Major sixth))
+  (define m7 (interval-of-a Minor seventh))
+  (define M7 (interval-of-a Major seventh))
+  (define P8 (interval-of-a Perfect octave))
 
   (define all-intervals (list P1 m2 M2 m3 M3 P4 d5 P5 m6 M6 m7 M7 P8))
 
@@ -123,4 +129,11 @@
         [(%failed? answer) (error "I don't know how to diminish this: " interval)]
         [else (let* ([binding (car answer)] ; expect only one binding
                      [result-elements (cdr binding)])
-                result-elements)]))))
+                result-elements)])))
+
+  (define stack list)
+  (define (span-of possibly-stacked-intervals)
+    (cond [(list? possibly-stacked-intervals) (fold + 0
+                                                    (map semitone-count-of
+                                                         possibly-stacked-intervals))]
+          [else (semitone-count-of possibly-stacked-intervals)])))

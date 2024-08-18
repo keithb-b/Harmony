@@ -10,7 +10,7 @@
 
   (require "library.rkt")
   (require (only-in "intervals.rkt"
-                    semitone-count-of
+                    interval-semitone-count
                     diminished))
   
   (define ♮ '♮)
@@ -74,8 +74,8 @@
     (or (equal? l r)
         (notes-enharmonic? l r)))               
   
-  (define (unison? interval)
-    (eq? 0 (semitone-count-of interval)))
+  (define (unison? an-interval)
+    (eq? 0 (interval-semitone-count an-interval)))
 
   (define (at-interval-from starting-note size)
     (let continue ([remaining-notes (concatenate (list chromatic-scale-C chromatic-scale-C))] ; avoid needing a modulus

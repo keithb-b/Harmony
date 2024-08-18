@@ -3,6 +3,7 @@
   (require rackunit/text-ui)
 
   (require quickcheck)
+  (require rackunit/quickcheck)
 
   (require "scales.rkt")
   (require "notes.rkt")
@@ -37,17 +38,27 @@
     (test-suite "intervals"
                 (test-suite "inversion"
                             (test-case "perfect intervals remain perfect"
-                                       (quickcheck
-                                        (property ((name (choose-one-of '(unison fourth fifth octave))))
-                                                  (equal? Perfect (quality-of (inversion-of (interval Perfect name)))))))
+                                       (check-property
+                                        (property ((quality (generator-unit Perfect))
+                                                   (name (choose-one-of '(unison fourth fifth octave))))
+                                                  (equal? quality (interval-quality (inversion-of (interval-of-a quality name)))))))
                             (test-case "minor intervals become major"
-                                       (quickcheck
+                                       (check-property
                                         (property ((name (choose-one-of '(second third sixth seventh))))
-                                                  (equal? Major (quality-of (inversion-of (interval Minor name)))))))
+                                                  (equal? Major (interval-quality (inversion-of (interval-of-a Minor name)))))))
                             (test-case "major intervals become minor"
-                                       (quickcheck
+                                       (check-property
                                         (property ((name (choose-one-of '(second third sixth seventh))))
-                                                  (equal? Minor (quality-of (inversion-of (interval Major name))))))))
+                                                  (equal? Minor (interval-quality (inversion-of (interval-of-a Major name)))))))
+                            (test-suite "stacked inversion spans an octave"
+                                        (test-case "imperfect intervals"
+                                                   (check-property
+                                                    (property ((quality (choose-one-of '(Minor Major)))
+                                                               (name (choose-one-of '(second third sixth seventh))))
+                                                              (let* ([given (interval-of-a quality name)]
+                                                                     [inversion (inversion-of given)])
+                                                                (equal? (span-of P8)
+                                                                        (span-of (stack given inversion)))))))))
                 
                 (test-suite "diminution"
                             (test-case "bigger intervals get smaller"
