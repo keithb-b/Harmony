@@ -42,8 +42,14 @@
                                                                         (span-of (stack given inversion)))))))))
                 
                 (test-suite "diminution"
-                            (test-case "bigger intervals get smaller"
-                                       (check-equal? m3 (diminished M3)))
+                            (test-case "minor intervals"
+                                       (check-property
+                                        (property ([quality (generator-unit Minor)]
+                                                   [name (choose-one-of '(second third sixth seventh))])
+                                                  (let* ([starting-interval (interval-of-a quality name)]
+                                                         [dim (diminished starting-interval)])
+                                                    (and (equal? Diminished (interval-quality dim))
+                                                         (equal? (interval-name starting-interval) (interval-name dim)))))))
                             (test-case "for now, attempts to diminish unison indicates an error"
                                        (check-exn exn:fail?
                                                   (lambda ()

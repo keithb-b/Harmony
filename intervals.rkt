@@ -1,9 +1,9 @@
 (module intervals racket
-
+  
   (provide Diminished Minor Perfect Major Augmented)
   (provide unison second third fourth fifth sixth seventh octave)
-  (provide interval interval-semitone-count interval-quality)
-  (provide interval-of-a inversion-of span-of stack diminished)
+  (provide interval interval-semitone-count interval-quality interval-name narrowed diminished)
+  (provide interval-of-a inversion-of span-of stack )
   (provide P1 m2 M2 m3 M3 P4 d5 P5 m6 M6 m7 M7 P8)
   (provide %chromatic-interval-sequence)
   
@@ -113,16 +113,24 @@
           ((M6 m7))
           ((m7 M7))
           ((M7 P8))))
-
  
-  (define (diminished interval)
+  (define (narrowed an-interval)
     (let ([answer (%which (Preceeding-interval)
-                          (%chromatic-interval-sequence Preceeding-interval interval))])
+                          (%chromatic-interval-sequence Preceeding-interval an-interval))])
       (cond
-        [(%failed? answer) (error "I don't know how to diminish this: " interval)]
-        [else (let* ([binding (car answer)] ; expect only one binding
-                     [result-elements (cdr binding)])
-                result-elements)])))
+        [(%failed? answer) (error "I don't know how to narrow this: " an-interval)]
+        [else (let ([binding (car answer)])
+                (cdr binding))])))
+
+  (define d2 (interval Diminished second 0))
+  (define (diminished-enharmonic an-interval)
+    (case (interval-semitone-count an-interval)
+      [(0) d2]
+      [else (error "I don't know a diminished enharmonic for: " an-interval)]))
+
+  (define (diminished an-interval)
+    (cond [(not (equal? Minor (interval-quality an-interval))) (error "I don't know how to diminish this: " an-interval)]
+          [else (diminished-enharmonic (narrowed an-interval))]))
 
   (define stack list)
   (define (span-of possibly-stacked-intervals)

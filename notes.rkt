@@ -11,7 +11,7 @@
   (require "library.rkt")
   (require (only-in "intervals.rkt"
                     interval-semitone-count
-                    diminished))
+                    narrowed))
   
   (define ♮ '♮)
   (define ♯ '♯)
@@ -91,7 +91,7 @@
                                                                      current-note
                                                                      #t)] ;... until we see that we're within the required interval
                       [else (continue notes-yet-to-be-seen
-                                      (cond [within-the-interval (diminished remaining-interval)]
+                                      (cond [within-the-interval (narrowed remaining-interval)]
                                             [else remaining-interval])
                                       current-note
                                       within-the-interval)]))]))))
